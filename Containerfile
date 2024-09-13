@@ -18,7 +18,7 @@ ARG JETBRAINS_DOWNLOAD_URL="https://download.jetbrains.com/idea/code-with-me/bac
 ARG JETBRAINS_OUTPUT_DIR=/root/jetbrains-server
 
 ARG INTELLIJ_BUILD=242.21829.142
-ARG CLION_BUILD=242.21829.173
+ARG CLION_BUILD=242.20224.413
 ARG PYCHARM_BUILD=242.21829.153
 
 ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU"
