@@ -1,12 +1,11 @@
 # Use Red Hat UBI 8 as the base image
-FROM registry.access.redhat.com/ubi8/ubi:latest
+FROM registry.access.redhat.com/ubi9/ubi:latest
 
 # Install required packages
 RUN dnf update -y && \
-    dnf install -y \
-        java-1.8.0-openjdk \
-        python3 \
-        curl && \
+    dnf install -y --setopt=install_weak_deps=False \
+        java-17-openjdk \
+        python3 && \
     dnf clean all
 
 # Set working directory
