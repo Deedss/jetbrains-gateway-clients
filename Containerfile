@@ -1,5 +1,5 @@
 # Use Red Hat UBI 8 as the base image
-FROM registry.access.redhat.com/ubi9/ubi:latest
+FROM docker.io/fedora:40
 
 # Install required packages
 RUN dnf update -y && \
