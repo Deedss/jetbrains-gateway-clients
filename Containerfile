@@ -1,11 +1,11 @@
-# Use Red Hat UBI 8 as the base image
-FROM docker.io/fedora:40
+# Use Alma linux as the base image
+FROM docker.io/almalinux:latest
 
 # Install required packages
 RUN dnf update -y && \
     dnf install -y --setopt=install_weak_deps=False \
-        java-17-openjdk \
-        python3 && \
+    java-17-openjdk \
+    python3.12 && \
     dnf clean all
 
 # Set working directory
@@ -16,20 +16,20 @@ ARG JETBRAINS_TOOL=jetbrains-clients-downloader-linux-x86_64-1867
 ARG JETBRAINS_DOWNLOAD_URL="https://download.jetbrains.com/idea/code-with-me/backend/${JETBRAINS_TOOL}.tar.gz"
 ARG JETBRAINS_OUTPUT_DIR=/root/jetbrains-server
 
-ARG INTELLIJ_BUILD=242.22855.74
-ARG CLION_BUILD=242.22855.75
-ARG PYCHARM_BUILD=242.22855.92
+ARG INTELLIJ_BUILD=242.23726.103
+ARG CLION_BUILD=242.23726.125 
+ARG PYCHARM_BUILD=242.23726.102
 
-ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU"
-ARG CLION_CMD="--platforms-filter linux-x64 --build-filter ${CLION_BUILD} --products-filter CL"
-ARG PYCHARM_CMD="--platforms-filter linux-x64 --build-filter ${PYCHARM_BUILD} --products-filter PY"
+ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU --verbose"
+ARG CLION_CMD="--platforms-filter linux-x64 --build-filter ${CLION_BUILD} --products-filter CL --verbose"
+ARG PYCHARM_CMD="--platforms-filter linux-x64 --build-filter ${PYCHARM_BUILD} --products-filter PY --verbose"
 
 # Download and extract the JetBrains offline download tool
 RUN curl -L ${JETBRAINS_DOWNLOAD_URL} -o ${JETBRAINS_TOOL}.tar.gz && \
     tar -xf ${JETBRAINS_TOOL}.tar.gz && \
     rm -f ${JETBRAINS_TOOL}.tar.gz
 
-# Download IntelliJ, CLion, and PyCharm backends
+# # Download IntelliJ, CLion, and PyCharm backends
 RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${INTELLIJ_CMD} ${JETBRAINS_OUTPUT_DIR} && \
     /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${CLION_CMD} ${JETBRAINS_OUTPUT_DIR} && \
     /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${PYCHARM_CMD} ${JETBRAINS_OUTPUT_DIR}
