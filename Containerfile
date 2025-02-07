@@ -1,11 +1,11 @@
 # Use Alma linux as the base image
-FROM docker.io/almalinux:latest
+FROM docker.io/fedora:latest
 
 # Install required packages
 RUN dnf update -y && \
     dnf install -y --setopt=install_weak_deps=False \
     java-17-openjdk \
-    python3.12 && \
+    python3 && \
     dnf clean all
 
 # Set working directory
@@ -16,9 +16,9 @@ ARG JETBRAINS_TOOL=jetbrains-clients-downloader-linux-x86_64-1867
 ARG JETBRAINS_DOWNLOAD_URL="https://download.jetbrains.com/idea/code-with-me/backend/${JETBRAINS_TOOL}.tar.gz"
 ARG JETBRAINS_OUTPUT_DIR=/root/jetbrains-server
 
-ARG INTELLIJ_BUILD=243.22562.145
-ARG CLION_BUILD=243.22562.155 
-ARG PYCHARM_BUILD=243.22562.180
+ARG INTELLIJ_BUILD=243.23654.189
+ARG CLION_BUILD=243.23654.114 
+ARG PYCHARM_BUILD=243.23654.177
 
 ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU --verbose"
 ARG CLION_CMD="--platforms-filter linux-x64 --build-filter ${CLION_BUILD} --products-filter CL --verbose"
