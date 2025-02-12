@@ -2,17 +2,14 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags: 
+    - "*"  # Matches all tags (e.g., v1.0.0, release-2025, etc.)
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag jetbrains-devcontainer-clients:$(tag)
+      run: docker build . --file Dockerfile --tag jetbrains-devcontainer-clients:${GITHUB_REF#refs/tags/}
