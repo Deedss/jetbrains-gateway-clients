@@ -17,7 +17,7 @@ ARG JETBRAINS_DOWNLOAD_URL="https://download.jetbrains.com/idea/code-with-me/bac
 ARG JETBRAINS_OUTPUT_DIR=/root/jetbrains-server
 
 ARG INTELLIJ_BUILD=243.26053.27
-ARG CLION_BUILD=243.25659.42 
+ARG CLION_BUILD=243.26053.34 
 ARG PYCHARM_BUILD=243.26053.29
 
 ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU --verbose"
@@ -30,14 +30,14 @@ RUN curl -L ${JETBRAINS_DOWNLOAD_URL} -o ${JETBRAINS_TOOL}.tar.gz && \
     rm -f ${JETBRAINS_TOOL}.tar.gz
 
 # # Download IntelliJ, CLion, and PyCharm backends
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${INTELLIJ_CMD} ${JETBRAINS_OUTPUT_DIR} && \
-    /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${CLION_CMD} ${JETBRAINS_OUTPUT_DIR} && \
-    /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${PYCHARM_CMD} ${JETBRAINS_OUTPUT_DIR}
+RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${INTELLIJ_CMD} ${JETBRAINS_OUTPUT_DIR}
+RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${CLION_CMD} ${JETBRAINS_OUTPUT_DIR}
+RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${PYCHARM_CMD} ${JETBRAINS_OUTPUT_DIR}
 
 # Download full products for IntelliJ, CLion, and PyCharm
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader  ${INTELLIJ_CMD} ${JETBRAINS_OUTPUT_DIR} && \
-    /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${CLION_CMD} ${JETBRAINS_OUTPUT_DIR} && \
-    /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${PYCHARM_CMD} ${JETBRAINS_OUTPUT_DIR}
+RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader  ${INTELLIJ_CMD} ${JETBRAINS_OUTPUT_DIR}
+RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${CLION_CMD} ${JETBRAINS_OUTPUT_DIR} 
+RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${PYCHARM_CMD} ${JETBRAINS_OUTPUT_DIR}
 
 RUN mkdir -p ${JETBRAINS_OUTPUT_DIR}/{jbr,clients} && \
     mv ${JETBRAINS_OUTPUT_DIR}/jbr_* ${JETBRAINS_OUTPUT_DIR}/jbr && \
