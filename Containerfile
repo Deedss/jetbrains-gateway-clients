@@ -4,7 +4,6 @@ FROM docker.io/fedora:latest
 # Install required packages
 RUN dnf update -y && \
     dnf install -y --setopt=install_weak_deps=False \
-    java-17-openjdk \
     python3 && \
     dnf clean all
 
@@ -16,9 +15,9 @@ ARG JETBRAINS_TOOL=jetbrains-clients-downloader-linux-x86_64-1867
 ARG JETBRAINS_DOWNLOAD_URL="https://download.jetbrains.com/idea/code-with-me/backend/${JETBRAINS_TOOL}.tar.gz"
 ARG JETBRAINS_OUTPUT_DIR=/root/jetbrains-server
 
-ARG INTELLIJ_BUILD=243.26053.27
-ARG CLION_BUILD=243.26053.34 
-ARG PYCHARM_BUILD=243.26053.29
+ARG INTELLIJ_BUILD=251.23774.435
+ARG CLION_BUILD=251.23774.442 
+ARG PYCHARM_BUILD=251.23774.444
 
 ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU --verbose"
 ARG CLION_CMD="--platforms-filter linux-x64 --build-filter ${CLION_BUILD} --products-filter CL --verbose"
