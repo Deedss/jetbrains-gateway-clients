@@ -17,7 +17,7 @@ ARG JETBRAINS_OUTPUT_DIR=/root/jetbrains-server
 
 ARG INTELLIJ_BUILD=251.25410.109
 ARG CLION_BUILD=251.25410.104 
-ARG PYCHARM_BUILD=251.23774.444
+ARG PYCHARM_BUILD=251.25410.122
 
 ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU --verbose"
 ARG CLION_CMD="--platforms-filter linux-x64 --build-filter ${CLION_BUILD} --products-filter CL --verbose"
