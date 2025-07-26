@@ -1,43 +1,46 @@
-# Use Alma linux as the base image
+# Containerfile: Download JetBrains backend and client
 FROM docker.io/fedora:latest
 
-# Install required packages
+# Install curl, Python, and tar (required by the JetBrains downloader)
 RUN dnf update -y && \
     dnf install -y --setopt=install_weak_deps=False \
-    python3 && \
+        python3 \
+        curl \
+        tar && \
     dnf clean all
 
-# Set working directory
 WORKDIR /root
 
-# Set environment variables
-ARG JETBRAINS_TOOL=jetbrains-clients-downloader-linux-x86_64-1867
-ARG JETBRAINS_DOWNLOAD_URL="https://download.jetbrains.com/idea/code-with-me/backend/${JETBRAINS_TOOL}.tar.gz"
-ARG JETBRAINS_OUTPUT_DIR=/root/jetbrains-server
+# Environment variables for the downloader tool
+ARG TOOL_NAME=jetbrains-clients-downloader-linux-x86_64-1867
+ARG TOOL_URL="https://download.jetbrains.com/idea/code-with-me/backend/${TOOL_NAME}.tar.gz"
+ARG OUTPUT_DIR=/root/jetbrains-server
 
-ARG INTELLIJ_BUILD=251.26094.121
-ARG CLION_BUILD=251.26094.123 
-ARG PYCHARM_BUILD=251.25410.159
+# Copy the download script into the container
+COPY download-jetbrains.sh /root/download-jetbrains.sh
+RUN chmod +x /root/download-jetbrains.sh
 
-ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU --verbose"
-ARG CLION_CMD="--platforms-filter linux-x64 --build-filter ${CLION_BUILD} --products-filter CL --verbose"
-ARG PYCHARM_CMD="--platforms-filter linux-x64 --build-filter ${PYCHARM_BUILD} --products-filter PY --verbose"
+# Download and extract the JetBrains downloader tool
+RUN curl -L ${TOOL_URL} -o ${TOOL_NAME}.tar.gz && \
+    tar -xf ${TOOL_NAME}.tar.gz && \
+    rm -f ${TOOL_NAME}.tar.gz
 
-# Download and extract the JetBrains offline download tool
-RUN curl -L ${JETBRAINS_DOWNLOAD_URL} -o ${JETBRAINS_TOOL}.tar.gz && \
-    tar -xf ${JETBRAINS_TOOL}.tar.gz && \
-    rm -f ${JETBRAINS_TOOL}.tar.gz
+# Build arguments (can be overridden at build time)
+ARG INTELLIJ_BUILDS=243.26574.91,251.27812.49
+ARG CLION_BUILDS=243.26574.92,251.27812.15
+ARG PYCHARM_BUILDS=243.26574.90,251.26927.90
 
-# # Download IntelliJ, CLion, and PyCharm backends
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${INTELLIJ_CMD} ${JETBRAINS_OUTPUT_DIR}
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${CLION_CMD} ${JETBRAINS_OUTPUT_DIR}
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader --download-backends ${PYCHARM_CMD} ${JETBRAINS_OUTPUT_DIR}
+# Ensure output directory exists and run the download script
+RUN mkdir -p ${OUTPUT_DIR} && \
+    /root/download-jetbrains.sh \
+        ${TOOL_NAME} \
+        ${OUTPUT_DIR} \
+        "${INTELLIJ_BUILDS}" \
+        "${CLION_BUILDS}" \
+        "${PYCHARM_BUILDS}"
 
-# Download full products for IntelliJ, CLion, and PyCharm
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader  ${INTELLIJ_CMD} ${JETBRAINS_OUTPUT_DIR}
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${CLION_CMD} ${JETBRAINS_OUTPUT_DIR} 
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${PYCHARM_CMD} ${JETBRAINS_OUTPUT_DIR}
+# Optional: organize output folders (jbr and clients)
+RUN mkdir -p ${OUTPUT_DIR}/{jbr,clients} && \
+    mv ${OUTPUT_DIR}/jbr_* ${OUTPUT_DIR}/jbr 2>/dev/null || true && \
+    mv ${OUTPUT_DIR}/JetBrainsClient* ${OUTPUT_DIR}/clients 2>/dev/null || true
 
-RUN mkdir -p ${JETBRAINS_OUTPUT_DIR}/{jbr,clients} && \
-    mv ${JETBRAINS_OUTPUT_DIR}/jbr_* ${JETBRAINS_OUTPUT_DIR}/jbr && \
-    mv ${JETBRAINS_OUTPUT_DIR}/JetBrainsClient* ${JETBRAINS_OUTPUT_DIR}/clients
