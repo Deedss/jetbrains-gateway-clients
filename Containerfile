@@ -14,9 +14,9 @@ WORKDIR /root
 ARG JETBRAINS_TOOL=jetbrains-clients-downloader-linux-x86_64-2149
 ARG JETBRAINS_DOWNLOAD_URL="https://download.jetbrains.com/idea/code-with-me/backend/${JETBRAINS_TOOL}.tar.gz"
 
-ARG INTELLIJ_BUILD=252.26199.169
-ARG CLION_BUILD=252.26199.153 
-ARG PYCHARM_BUILD=252.26199.168
+ARG INTELLIJ_BUILD=252.26830.84
+ARG CLION_BUILD=252.26830.83 
+ARG PYCHARM_BUILD=252.26830.99
 
 ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU --verbose"
 ARG CLION_CMD="--platforms-filter linux-x64 --build-filter ${CLION_BUILD} --products-filter CL --verbose"
