@@ -1,4 +1,3 @@
-# Use Alma linux as the base image
 FROM docker.io/fedora:latest
 
 # Install required packages
@@ -14,9 +13,9 @@ WORKDIR /root
 ARG JETBRAINS_TOOL=jetbrains-clients-downloader-linux-x86_64-2149
 ARG JETBRAINS_DOWNLOAD_URL="https://download.jetbrains.com/idea/code-with-me/backend/${JETBRAINS_TOOL}.tar.gz"
 
-ARG INTELLIJ_BUILD=252.26830.84
-ARG CLION_BUILD=252.26830.83 
-ARG PYCHARM_BUILD=252.26830.99
+ARG INTELLIJ_BUILD=252.27397.103
+ARG CLION_BUILD=252.27397.114
+ARG PYCHARM_BUILD=252.27397.106
 
 ARG INTELLIJ_CMD="--platforms-filter linux-x64 --build-filter ${INTELLIJ_BUILD} --products-filter IU --verbose"
 ARG CLION_CMD="--platforms-filter linux-x64 --build-filter ${CLION_BUILD} --products-filter CL --verbose"
@@ -32,7 +31,7 @@ RUN curl -L ${JETBRAINS_DOWNLOAD_URL} -o ${JETBRAINS_TOOL}.tar.gz && \
 
 # Download full products for IntelliJ, CLion, and PyCharm
 RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${INTELLIJ_CMD} ${JETBRAINS_CLIENTS_DIR}
-RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${CLION_CMD} ${JETBRAINS_CLIENTS_DIR} 
+RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${CLION_CMD} ${JETBRAINS_CLIENTS_DIR}
 RUN /root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader ${PYCHARM_CMD} ${JETBRAINS_CLIENTS_DIR}
 
 # Download IntelliJ, CLion, and PyCharm backends
