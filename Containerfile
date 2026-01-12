@@ -32,7 +32,7 @@ RUN curl -L ${JETBRAINS_DOWNLOAD_URL} -o ${JETBRAINS_TOOL}.tar.gz && \
 # Resolve all JetBrains stable build numbers
 # --------------------------------------------------
 RUN echo "Resolving all JetBrains stable build numbers..." && \
-    curl -s "https://data.services.jetbrains.com/products/releases?code=CL,IU,RR,PY&latest=true" \
+    curl -s "https://data.services.jetbrains.com/products/releases?code=CL,IU,RR,PY&majorVersion=${IDE_VERSION}&latest=true" \
     | jq -r '\
     "CLION_BUILD=\(.CL[0].build)", \
     "INTELLIJ_BUILD=\(.IIU[0].build)", \
@@ -44,8 +44,8 @@ RUN echo "Resolving all JetBrains stable build numbers..." && \
 # --------------------------------------------------
 # Download commands
 # --------------------------------------------------
-ARG CLIENT_COMMAND="--platforms-filter linux-x64 --verbose --build-filter"
-ARG BACKEND_COMMAND="--download-backends --platforms-filter linux-x64 --verbose --build-filter"
+ARG CLIENT_COMMAND="--platforms-filter linux-x64 --build-filter"
+ARG BACKEND_COMMAND="--download-backends --platforms-filter linux-x64 --build-filter"
 
 # --------------------------------------------------
 # Download IntelliJ (client + backend)
