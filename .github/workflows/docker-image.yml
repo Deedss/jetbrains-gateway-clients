@@ -6,7 +6,7 @@ on:
       tag:
         description: "Image tag"
         required: false
-        default: "latest"
+        default: "2025.3"
 
 env:
   IMAGE_NAME: deedss/jetbrains-remote-development
@@ -40,3 +40,5 @@ jobs:
           file: ./Containerfile
           push: true
           tags: ${{ env.IMAGE_NAME }}:${{ github.event.inputs.tag }}
+          build-args: |
+            IDE_VERSION=${{ github.event.inputs.tag }}
