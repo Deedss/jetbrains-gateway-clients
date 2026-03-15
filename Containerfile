@@ -36,7 +36,7 @@ ARG RUSTROVER_BUILD=
 RUN if [ -z "${INTELLIJ_BUILD}" ] || [ -z "${RUSTROVER_BUILD}" ] || [ -z "${CLION_BUILD}" ] || [ -z "${PYCHARM_BUILD}" ]; then \
     echo "Fetching build numbers from JetBrains API for missing IDEs..." && \
     API_RESPONSE=$(curl -s "https://data.services.jetbrains.com/products/releases?code=CL,IU,RR,PY&majorVersion=${IDE_VERSION}&latest=true") && \
-    [ -z "${INTELLIJ_BUILD}" ]  && echo "INTELLIJ_BUILD_API=$(echo  "${API_RESPONSE}" | jq -r '.IU[0].build')"  >> /root/builds_api.env; \
+    [ -z "${INTELLIJ_BUILD}" ]  && echo "INTELLIJ_BUILD_API=$(echo  "${API_RESPONSE}" | jq -r '.IIU[0].build')"  >> /root/builds_api.env; \
     [ -z "${CLION_BUILD}" ]     && echo "CLION_BUILD_API=$(echo     "${API_RESPONSE}" | jq -r '.CL[0].build')"  >> /root/builds_api.env; \
     [ -z "${PYCHARM_BUILD}" ]   && echo "PYCHARM_BUILD_API=$(echo   "${API_RESPONSE}" | jq -r '.PCP[0].build')" >> /root/builds_api.env; \
     [ -z "${RUSTROVER_BUILD}" ] && echo "RUSTROVER_BUILD_API=$(echo "${API_RESPONSE}" | jq -r '.RR[0].build')"  >> /root/builds_api.env; \
