@@ -48,8 +48,8 @@ RUN if [ -z "${INTELLIJ_BUILD}" ] || [ -z "${RUSTROVER_BUILD}" ] || [ -z "${CLIO
 # --------------------------------------------------
 # Download commands
 # --------------------------------------------------
-ARG CLIENT_COMMAND="--platforms-filter linux-x64 --build-filter"
-ARG BACKEND_COMMAND="--download-backends --platforms-filter linux-x64 --build-filter"
+ARG CLIENT_COMMAND="--include-eap-builds --platforms-filter linux-x64 --build-filter"
+ARG BACKEND_COMMAND="--include-eap-builds --download-backends --platforms-filter linux-x64 --build-filter"
 # --------------------------------------------------
 # Download IntelliJ (client + backend)
 # --------------------------------------------------
