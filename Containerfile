@@ -1,5 +1,4 @@
 FROM docker.io/fedora:latest
-
 # --------------------------------------------------
 # Base packages
 # --------------------------------------------------
@@ -9,68 +8,77 @@ RUN dnf update -y && \
     curl \
     jq && \
     dnf clean all
-
 WORKDIR /root
-
 # --------------------------------------------------
 # JetBrains downloader
 # --------------------------------------------------
 ARG JETBRAINS_TOOL=jetbrains-clients-downloader-linux-x86_64-2149
 ARG JETBRAINS_DOWNLOAD_URL=https://download.jetbrains.com/idea/code-with-me/backend/${JETBRAINS_TOOL}.tar.gz
 ARG JETBRAINS_TOOL_BIN=/root/${JETBRAINS_TOOL}/bin/jetbrains-clients-downloader
-
 ARG JETBRAINS_CLIENTS_DIR=/root/jetbrains-server/clients
 ARG JETBRAINS_BACKEND_DIR=/root/jetbrains-server
-
-ARG IDE_VERSION=2025.3
-
 RUN curl -L ${JETBRAINS_DOWNLOAD_URL} -o ${JETBRAINS_TOOL}.tar.gz && \
     tar -xf ${JETBRAINS_TOOL}.tar.gz && \
     rm -f ${JETBRAINS_TOOL}.tar.gz
-
 # --------------------------------------------------
-# Resolve all JetBrains stable build numbers
+# Per-IDE build filters (leave empty to auto-resolve
+# from the JetBrains API using IDE_VERSION below)
+# IDE_VERSION is always based on last stable major release (e.g. 2025.3)
 # --------------------------------------------------
-RUN echo "Resolving all JetBrains stable build numbers..." && \
-    curl -s "https://data.services.jetbrains.com/products/releases?code=CL,IU,RR,PY&majorVersion=${IDE_VERSION}&latest=true" \
-    | jq -r '\
-    "CLION_BUILD=\(.CL[0].build)", \
-    "INTELLIJ_BUILD=\(.IIU[0].build)", \
-    "RUSTROVER_BUILD=\(.RR[0].build)", \
-    "PYCHARM_BUILD=\(.PCP[0].build)"\
-    ' > /root/builds.env && \
-    cat /root/builds.env
-
+ARG IDE_VERSION=2025.3
+ARG INTELLIJ_BUILD=
+ARG RUSTROVER_BUILD=
+ARG CLION_BUILD=
+ARG PYCHARM_BUILD=
+# --------------------------------------------------
+# Resolve missing build numbers via JetBrains API
+# --------------------------------------------------
+RUN if [ -z "${INTELLIJ_BUILD}" ] || [ -z "${RUSTROVER_BUILD}" ] || [ -z "${CLION_BUILD}" ] || [ -z "${PYCHARM_BUILD}" ]; then \
+        echo "Fetching build numbers from JetBrains API for missing IDEs..." && \
+        API_RESPONSE=$(curl -s "https://data.services.jetbrains.com/products/releases?code=CL,IU,RR,PY&majorVersion=${IDE_VERSION}&latest=true") && \
+        [ -z "${INTELLIJ_BUILD}" ]  && echo "INTELLIJ_BUILD_API=$(echo  "${API_RESPONSE}" | jq -r '.IU[0].build')"  >> /root/builds_api.env; \
+        [ -z "${RUSTROVER_BUILD}" ] && echo "RUSTROVER_BUILD_API=$(echo "${API_RESPONSE}" | jq -r '.RR[0].build')"  >> /root/builds_api.env; \
+        [ -z "${CLION_BUILD}" ]     && echo "CLION_BUILD_API=$(echo     "${API_RESPONSE}" | jq -r '.CL[0].build')"  >> /root/builds_api.env; \
+        [ -z "${PYCHARM_BUILD}" ]   && echo "PYCHARM_BUILD_API=$(echo   "${API_RESPONSE}" | jq -r '.PCP[0].build')" >> /root/builds_api.env; \
+        echo "Resolved builds:" && cat /root/builds_api.env; \
+    else \
+        echo "All build numbers provided, skipping API resolution."; \
+    fi && \
+    touch /root/builds_api.env
 # --------------------------------------------------
 # Download commands
 # --------------------------------------------------
 ARG CLIENT_COMMAND="--platforms-filter linux-x64 --build-filter"
 ARG BACKEND_COMMAND="--download-backends --platforms-filter linux-x64 --build-filter"
-
 # --------------------------------------------------
 # Download IntelliJ (client + backend)
 # --------------------------------------------------
-RUN . /root/builds.env && \
-    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${INTELLIJ_BUILD} --products-filter IU ${JETBRAINS_CLIENTS_DIR} && \
-    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${INTELLIJ_BUILD} --products-filter IU ${JETBRAINS_BACKEND_DIR}
-
-# # --------------------------------------------------
-# # Download RustRover (client + backend)
-# # --------------------------------------------------
-RUN . /root/builds.env && \
-    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${RUSTROVER_BUILD} --products-filter RR ${JETBRAINS_CLIENTS_DIR} && \
-    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${RUSTROVER_BUILD} --products-filter RR ${JETBRAINS_BACKEND_DIR}
-
+RUN . /root/builds_api.env; \
+    BUILD="${INTELLIJ_BUILD:-${INTELLIJ_BUILD_API}}"; \
+    echo "Downloading IntelliJ build ${BUILD}..." && \
+    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${BUILD} --products-filter IU ${JETBRAINS_CLIENTS_DIR} && \
+    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${BUILD} --products-filter IU ${JETBRAINS_BACKEND_DIR}
+# --------------------------------------------------
+# Download RustRover (client + backend)
+# --------------------------------------------------
+RUN . /root/builds_api.env; \
+    BUILD="${RUSTROVER_BUILD:-${RUSTROVER_BUILD_API}}"; \
+    echo "Downloading RustRover build ${BUILD}..." && \
+    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${BUILD} --products-filter RR ${JETBRAINS_CLIENTS_DIR} && \
+    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${BUILD} --products-filter RR ${JETBRAINS_BACKEND_DIR}
 # --------------------------------------------------
 # Download CLion (client + backend)
 # --------------------------------------------------
-RUN . /root/builds.env && \
-    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${CLION_BUILD} --products-filter CL ${JETBRAINS_CLIENTS_DIR} && \
-    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${CLION_BUILD} --products-filter CL ${JETBRAINS_BACKEND_DIR}
-
+RUN . /root/builds_api.env; \
+    BUILD="${CLION_BUILD:-${CLION_BUILD_API}}"; \
+    echo "Downloading CLion build ${BUILD}..." && \
+    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${BUILD} --products-filter CL ${JETBRAINS_CLIENTS_DIR} && \
+    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${BUILD} --products-filter CL ${JETBRAINS_BACKEND_DIR}
 # --------------------------------------------------
 # Download PyCharm (client + backend)
 # --------------------------------------------------
-RUN . /root/builds.env && \
-    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${PYCHARM_BUILD} --products-filter PY ${JETBRAINS_CLIENTS_DIR} && \
-    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${PYCHARM_BUILD} --products-filter PY ${JETBRAINS_BACKEND_DIR}
+RUN . /root/builds_api.env; \
+    BUILD="${PYCHARM_BUILD:-${PYCHARM_BUILD_API}}"; \
+    echo "Downloading PyCharm build ${BUILD}..." && \
+    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${BUILD} --products-filter PY ${JETBRAINS_CLIENTS_DIR} && \
+    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${BUILD} --products-filter PY ${JETBRAINS_BACKEND_DIR}
