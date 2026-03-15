@@ -13,14 +13,14 @@ on:
       intellij_build:
         description: "IntelliJ build filter (e.g. 251.23774.435), leave empty to resolve from API"
         required: false
-      rustrover_build:
-        description: "RustRover build filter (e.g. 251.23774.103), leave empty to resolve from API"
-        required: false
       clion_build:
         description: "CLion build filter (e.g. 251.23774.103), leave empty to resolve from API"
         required: false
       pycharm_build:
         description: "PyCharm build filter (e.g. 251.23774.226), leave empty to resolve from API"
+        required: false
+      rustrover_build:
+        description: "RustRover build filter (e.g. 251.23774.103), leave empty to resolve from API"
         required: false
 env:
   IMAGE_NAME: deedss/jetbrains-remote-development

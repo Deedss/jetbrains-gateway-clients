@@ -27,22 +27,22 @@ RUN curl -L ${JETBRAINS_DOWNLOAD_URL} -o ${JETBRAINS_TOOL}.tar.gz && \
 # --------------------------------------------------
 ARG IDE_VERSION=2025.3
 ARG INTELLIJ_BUILD=
-ARG RUSTROVER_BUILD=
 ARG CLION_BUILD=
 ARG PYCHARM_BUILD=
+ARG RUSTROVER_BUILD=
 # --------------------------------------------------
 # Resolve missing build numbers via JetBrains API
 # --------------------------------------------------
 RUN if [ -z "${INTELLIJ_BUILD}" ] || [ -z "${RUSTROVER_BUILD}" ] || [ -z "${CLION_BUILD}" ] || [ -z "${PYCHARM_BUILD}" ]; then \
-        echo "Fetching build numbers from JetBrains API for missing IDEs..." && \
-        API_RESPONSE=$(curl -s "https://data.services.jetbrains.com/products/releases?code=CL,IU,RR,PY&majorVersion=${IDE_VERSION}&latest=true") && \
-        [ -z "${INTELLIJ_BUILD}" ]  && echo "INTELLIJ_BUILD_API=$(echo  "${API_RESPONSE}" | jq -r '.IU[0].build')"  >> /root/builds_api.env; \
-        [ -z "${RUSTROVER_BUILD}" ] && echo "RUSTROVER_BUILD_API=$(echo "${API_RESPONSE}" | jq -r '.RR[0].build')"  >> /root/builds_api.env; \
-        [ -z "${CLION_BUILD}" ]     && echo "CLION_BUILD_API=$(echo     "${API_RESPONSE}" | jq -r '.CL[0].build')"  >> /root/builds_api.env; \
-        [ -z "${PYCHARM_BUILD}" ]   && echo "PYCHARM_BUILD_API=$(echo   "${API_RESPONSE}" | jq -r '.PCP[0].build')" >> /root/builds_api.env; \
-        echo "Resolved builds:" && cat /root/builds_api.env; \
+    echo "Fetching build numbers from JetBrains API for missing IDEs..." && \
+    API_RESPONSE=$(curl -s "https://data.services.jetbrains.com/products/releases?code=CL,IU,RR,PY&majorVersion=${IDE_VERSION}&latest=true") && \
+    [ -z "${INTELLIJ_BUILD}" ]  && echo "INTELLIJ_BUILD_API=$(echo  "${API_RESPONSE}" | jq -r '.IU[0].build')"  >> /root/builds_api.env; \
+    [ -z "${CLION_BUILD}" ]     && echo "CLION_BUILD_API=$(echo     "${API_RESPONSE}" | jq -r '.CL[0].build')"  >> /root/builds_api.env; \
+    [ -z "${PYCHARM_BUILD}" ]   && echo "PYCHARM_BUILD_API=$(echo   "${API_RESPONSE}" | jq -r '.PCP[0].build')" >> /root/builds_api.env; \
+    [ -z "${RUSTROVER_BUILD}" ] && echo "RUSTROVER_BUILD_API=$(echo "${API_RESPONSE}" | jq -r '.RR[0].build')"  >> /root/builds_api.env; \
+    echo "Resolved builds:" && cat /root/builds_api.env; \
     else \
-        echo "All build numbers provided, skipping API resolution."; \
+    echo "All build numbers provided, skipping API resolution."; \
     fi && \
     touch /root/builds_api.env
 # --------------------------------------------------
@@ -59,14 +59,6 @@ RUN . /root/builds_api.env; \
     ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${BUILD} --products-filter IU ${JETBRAINS_CLIENTS_DIR} && \
     ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${BUILD} --products-filter IU ${JETBRAINS_BACKEND_DIR}
 # --------------------------------------------------
-# Download RustRover (client + backend)
-# --------------------------------------------------
-RUN . /root/builds_api.env; \
-    BUILD="${RUSTROVER_BUILD:-${RUSTROVER_BUILD_API}}"; \
-    echo "Downloading RustRover build ${BUILD}..." && \
-    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${BUILD} --products-filter RR ${JETBRAINS_CLIENTS_DIR} && \
-    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${BUILD} --products-filter RR ${JETBRAINS_BACKEND_DIR}
-# --------------------------------------------------
 # Download CLion (client + backend)
 # --------------------------------------------------
 RUN . /root/builds_api.env; \
@@ -82,3 +74,11 @@ RUN . /root/builds_api.env; \
     echo "Downloading PyCharm build ${BUILD}..." && \
     ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${BUILD} --products-filter PY ${JETBRAINS_CLIENTS_DIR} && \
     ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${BUILD} --products-filter PY ${JETBRAINS_BACKEND_DIR}
+# --------------------------------------------------
+# Download RustRover (client + backend)
+# --------------------------------------------------
+RUN . /root/builds_api.env; \
+    BUILD="${RUSTROVER_BUILD:-${RUSTROVER_BUILD_API}}"; \
+    echo "Downloading RustRover build ${BUILD}..." && \
+    ${JETBRAINS_TOOL_BIN} ${CLIENT_COMMAND} ${BUILD} --products-filter RR ${JETBRAINS_CLIENTS_DIR} && \
+    ${JETBRAINS_TOOL_BIN} ${BACKEND_COMMAND} ${BUILD} --products-filter RR ${JETBRAINS_BACKEND_DIR}
